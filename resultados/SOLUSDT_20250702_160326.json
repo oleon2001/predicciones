@@ -1,0 +1,55 @@
+{
+  "par": "SOLUSDT",
+  "timestamp": "20250702_160326",
+  "analisis_basico": {
+    "precio": {
+      "actual": 152.49,
+      "cambio_24h": 0.016261246251249566,
+      "maximo_24h": 153.64,
+      "minimo_24h": 149.1
+    },
+    "rsi": {
+      "valor": 58.1588842008214,
+      "estado": "Alcista"
+    },
+    "macd": {
+      "macd": 0.6788980032222582,
+      "signal": 0.7269873794858577,
+      "divergencia": -0.04808937626359944
+    },
+    "medias": {
+      "sma_20": 152.1635,
+      "sma_50": 150.3104,
+      "ema_12": 152.29714933468884,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 153.62084381668575,
+      "lower": 150.70615618331425,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 5437.383,
+      "promedio_20": 46635.36185,
+      "ratio": 0.11659356300244939,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 60
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "COMPRA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 160.11450000000002,
+    "stop_loss": 147.9153,
+    "take_profit": 167.73900000000003,
+    "razonamiento": [
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}

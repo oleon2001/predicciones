@@ -1,0 +1,55 @@
+{
+  "par": "BTCUSDT",
+  "timestamp": "20250702_160243",
+  "analisis_basico": {
+    "precio": {
+      "actual": 109482.07,
+      "cambio_24h": 0.015127129566270388,
+      "maximo_24h": 109730.0,
+      "minimo_24h": 107659.35
+    },
+    "rsi": {
+      "valor": 63.312826281361744,
+      "estado": "Alcista"
+    },
+    "macd": {
+      "macd": 392.59599793324014,
+      "signal": 425.629630326136,
+      "divergencia": -33.03363239289587
+    },
+    "medias": {
+      "sma_20": 109249.269,
+      "sma_50": 108294.65520000001,
+      "ema_12": 109368.48524588288,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 109965.68679868751,
+      "lower": 108532.85120131249,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 33.74061,
+      "promedio_20": 325.5181885,
+      "ratio": 0.10365199608500524,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 60
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "COMPRA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 114956.17350000002,
+    "stop_loss": 106197.6079,
+    "take_profit": 120430.27700000002,
+    "razonamiento": [
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}

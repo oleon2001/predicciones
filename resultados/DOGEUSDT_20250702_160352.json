@@ -1,0 +1,55 @@
+{
+  "par": "DOGEUSDT",
+  "timestamp": "20250702_160352",
+  "analisis_basico": {
+    "precio": {
+      "actual": 0.17106,
+      "cambio_24h": 0.04707106567913327,
+      "maximo_24h": 0.17268,
+      "minimo_24h": 0.16216
+    },
+    "rsi": {
+      "valor": 68.20823542202882,
+      "estado": "Alcista"
+    },
+    "macd": {
+      "macd": 0.0018563153374068775,
+      "signal": 0.0021410438655231788,
+      "divergencia": -0.0002847285281163013
+    },
+    "medias": {
+      "sma_20": 0.170049,
+      "sma_50": 0.1650194,
+      "ema_12": 0.17054364740062258,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 0.17453076259969674,
+      "lower": 0.16556723740030327,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 2352385.0,
+      "promedio_20": 20756186.45,
+      "ratio": 0.11333416211435121,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 60
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "COMPRA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 0.179613,
+    "stop_loss": 0.1659282,
+    "take_profit": 0.188166,
+    "razonamiento": [
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}

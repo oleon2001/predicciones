@@ -1,0 +1,55 @@
+{
+  "par": "PEPEUSDT",
+  "timestamp": "20250702_160418",
+  "analisis_basico": {
+    "precio": {
+      "actual": 1.018e-05,
+      "cambio_24h": 0.05821205821205836,
+      "maximo_24h": 1.035e-05,
+      "minimo_24h": 9.57e-06
+    },
+    "rsi": {
+      "valor": 65.15896228833725,
+      "estado": "Alcista"
+    },
+    "macd": {
+      "macd": 1.2728825775469757e-07,
+      "signal": 1.4257650137135347e-07,
+      "divergencia": -1.52882436166559e-08
+    },
+    "medias": {
+      "sma_20": 1.0079e-05,
+      "sma_50": 9.759000000000001e-06,
+      "ema_12": 1.0128161955155553e-05,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 1.0431073855888148e-05,
+      "lower": 9.72692614411185e-06,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 70008857469.0,
+      "promedio_20": 414283178619.4,
+      "ratio": 0.16898793164208292,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 60
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "COMPRA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 1.0689e-05,
+    "stop_loss": 9.8746e-06,
+    "take_profit": 1.1198000000000002e-05,
+    "razonamiento": [
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}

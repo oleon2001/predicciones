@@ -1,0 +1,56 @@
+{
+  "par": "ETHUSDT",
+  "timestamp": "20250702_154655",
+  "analisis_basico": {
+    "precio": {
+      "actual": 2581.38,
+      "cambio_24h": 0.05112324550152095,
+      "maximo_24h": 2589.28,
+      "minimo_24h": 2448.68
+    },
+    "rsi": {
+      "valor": 75.73974977155926,
+      "estado": "Sobrecomprado"
+    },
+    "macd": {
+      "macd": 28.80417042626823,
+      "signal": 29.43858934946041,
+      "divergencia": -0.6344189231921824
+    },
+    "medias": {
+      "sma_20": 2552.3230000000003,
+      "sma_50": 2491.1688,
+      "ema_12": 2568.190979172514,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 2617.5960192651605,
+      "lower": 2487.04998073484,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 702.8674,
+      "promedio_20": 14235.302594999997,
+      "ratio": 0.049374953241027336,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 40
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "VENTA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 2452.311,
+    "stop_loss": 2658.8214000000003,
+    "take_profit": 2323.242,
+    "razonamiento": [
+      "RSI en zona de sobrecompra (precauci\u00f3n)",
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}

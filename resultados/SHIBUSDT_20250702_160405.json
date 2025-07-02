@@ -1,0 +1,55 @@
+{
+  "par": "SHIBUSDT",
+  "timestamp": "20250702_160405",
+  "analisis_basico": {
+    "precio": {
+      "actual": 1.186e-05,
+      "cambio_24h": 0.033101045296167225,
+      "maximo_24h": 1.2e-05,
+      "minimo_24h": 1.143e-05
+    },
+    "rsi": {
+      "valor": 63.52638001013186,
+      "estado": "Alcista"
+    },
+    "macd": {
+      "macd": 8.600271432874196e-08,
+      "signal": 1.021546274759328e-07,
+      "divergencia": -1.6151913147190848e-08
+    },
+    "medias": {
+      "sma_20": 1.18255e-05,
+      "sma_50": 1.1567799999999998e-05,
+      "ema_12": 1.1836965960950127e-05,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 1.2032137363513892e-05,
+      "lower": 1.1618862636486109e-05,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 4225069847.0,
+      "promedio_20": 36219640656.95,
+      "ratio": 0.11665134635147943,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 60
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "COMPRA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 1.2453000000000001e-05,
+    "stop_loss": 1.1504199999999999e-05,
+    "take_profit": 1.3046000000000002e-05,
+    "razonamiento": [
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}

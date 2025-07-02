@@ -1,0 +1,25 @@
+{
+  "api_key": "26Sh06jOHDKVRqZY5puDa7q16hQ1CU0aitWM0OWy1iMF0jU8h8jqKqUFsxzLC5Ze",
+  "api_secret": "yOWjPf3wHDuQbBJVKll3kDYGG6c57GiUgbdu6Xp79VnAG3dzC5AUMU4IDd3LhsnT",
+  "news_api_key": "95a1ebc226f34eb38842c95fd4ce1932",
+  "pares_analizar": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "ADAUSDT",
+    "DOGEUSDT",
+    "SHIBUSDT",
+    "PEPEUSDT"
+  ],
+  "intervalo_datos": "15m",
+  "periodo_historico": "30 day ago UTC",
+  "horizontes_prediccion": [
+    1,
+    4,
+    12,
+    24
+  ],
+  "modo_avanzado": true,
+  "guardar_resultados": true,
+  "mostrar_graficos": true
+}

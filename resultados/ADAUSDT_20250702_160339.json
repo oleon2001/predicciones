@@ -1,0 +1,56 @@
+{
+  "par": "ADAUSDT",
+  "timestamp": "20250702_160339",
+  "analisis_basico": {
+    "precio": {
+      "actual": 0.595,
+      "cambio_24h": 0.05309734513274342,
+      "maximo_24h": 0.5998,
+      "minimo_24h": 0.5621
+    },
+    "rsi": {
+      "valor": 72.01471411780457,
+      "estado": "Sobrecomprado"
+    },
+    "macd": {
+      "macd": 0.006804644382125358,
+      "signal": 0.007758534795852346,
+      "divergencia": -0.0009538904137269882
+    },
+    "medias": {
+      "sma_20": 0.59131,
+      "sma_50": 0.572906,
+      "ema_12": 0.5930703462843377,
+      "tendencia": "Alcista Fuerte"
+    },
+    "bollinger": {
+      "upper": 0.605085180579596,
+      "lower": 0.577534819420404,
+      "posicion": "En zona media"
+    },
+    "volumen": {
+      "actual": 618710.4,
+      "promedio_20": 4636672.505000001,
+      "ratio": 0.13343845167688848,
+      "interpretacion": "Bajo"
+    },
+    "score_tecnico": 40
+  },
+  "analisis_avanzado": {},
+  "predicciones": {},
+  "recomendaciones": {
+    "se\u00f1al_principal": "VENTA",
+    "confianza": 0.48,
+    "horizonte_optimo": "4h",
+    "precio_objetivo": 0.5652499999999999,
+    "stop_loss": 0.61285,
+    "take_profit": 0.5355,
+    "razonamiento": [
+      "RSI en zona de sobrecompra (precauci\u00f3n)",
+      "Tendencia alcista fuerte confirmada por medias m\u00f3viles",
+      "MACD muestra momentum bajista",
+      "Confirmado por an\u00e1lisis de Machine Learning"
+    ]
+  },
+  "score_final": 50
+}
