@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-07-03 09:33:17",
+  "symbol": "ETHUSDT",
+  "tipo": "DEMO",
+  "analisis_actual": {
+    "precio_actual": 5110.330041138857,
+    "cambio_24h": 3.1702970424975216,
+    "tendencia_score": 1,
+    "interpretacion": "\ud83d\udfe0 NEUTRAL/MIXTA",
+    "rsi": 44.89500667505096,
+    "macd": -72.60395842519665,
+    "soporte": 4891.3015609690065,
+    "resistencia": 5574.62871623922
+  },
+  "predicciones": {
+    "1h": {
+      "precio_predicho": 3799.8015656783323,
+      "cambio_porcentual": -25.644693491625613,
+      "intervalo_inferior": 3568.459491074792,
+      "intervalo_superior": 4031.1436402818726,
+      "confianza": 0.5
+    },
+    "4h": {
+      "precio_predicho": 5428.2879509690465,
+      "cambio_porcentual": 6.221866440534848,
+      "intervalo_inferior": 4965.603801761966,
+      "intervalo_superior": 5890.972100176127,
+      "confianza": 0.5
+    },
+    "12h": {
+      "precio_predicho": 9770.918311744284,
+      "cambio_porcentual": 91.19935959296274,
+      "intervalo_inferior": 8969.525857460842,
+      "intervalo_superior": 10572.310766027727,
+      "confianza": 0.5
+    },
+    "24h": {
+      "precio_predicho": 16284.86385290714,
+      "cambio_porcentual": 218.66559932160453,
+      "intervalo_inferior": 15151.523775276033,
+      "intervalo_superior": 17418.203930538246,
+      "confianza": 0.5
+    }
+  },
+  "advertencia": "DATOS SIMULADOS - SOLO PARA DEMOSTRACI\u00d3N"
+}

@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-07-03 09:29:32",
+  "symbol": "BTCUSDT",
+  "tipo": "DEMO",
+  "analisis_actual": {
+    "precio_actual": 12662.473753302012,
+    "cambio_24h": -4.9759896021089345,
+    "tendencia_score": 4,
+    "interpretacion": "\ud83d\udfe2 ALCISTA FUERTE",
+    "rsi": 47.7471401884935,
+    "macd": -195.3466198619135,
+    "soporte": 11717.932842155858,
+    "resistencia": 13042.39863855616
+  },
+  "predicciones": {
+    "1h": {
+      "precio_predicho": 11159.127541710326,
+      "cambio_porcentual": -11.872452736177689,
+      "intervalo_inferior": 10250.463700883834,
+      "intervalo_superior": 12067.791382536818,
+      "confianza": 0.5
+    },
+    "4h": {
+      "precio_predicho": 15941.610773871897,
+      "cambio_porcentual": 25.896496091174747,
+      "intervalo_inferior": 14124.283092218911,
+      "intervalo_superior": 17758.93845552488,
+      "confianza": 0.5
+    },
+    "12h": {
+      "precio_predicho": 28694.899392969415,
+      "cambio_porcentual": 126.61369296411455,
+      "intervalo_inferior": 25547.195514345087,
+      "intervalo_superior": 31842.603271593744,
+      "confianza": 0.5
+    },
+    "24h": {
+      "precio_predicho": 47824.832321615686,
+      "cambio_porcentual": 277.68948827352426,
+      "intervalo_inferior": 43373.306806130764,
+      "intervalo_superior": 52276.35783710061,
+      "confianza": 0.5
+    }
+  },
+  "advertencia": "DATOS SIMULADOS - SOLO PARA DEMOSTRACI\u00d3N"
+}

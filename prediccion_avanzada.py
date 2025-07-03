@@ -41,7 +41,7 @@ except ImportError:
 from ta.volatility import BollingerBands, AverageTrueRange
 from ta.trend import MACD, SMAIndicator, EMAIndicator, ADXIndicator
 from ta.momentum import RSIIndicator, StochasticOscillator, WilliamsRIndicator
-from ta.volume import OnBalanceVolumeIndicator, VolumeSMAIndicator
+from ta.volume import OnBalanceVolumeIndicator, VolumePriceTrendIndicator
 
 # Visualización
 import matplotlib.pyplot as plt
@@ -64,7 +64,7 @@ class ConfiguracionAvanzada:
     # Pares de alta prioridad para análisis profundo
     PARES_PRIORITARIOS = [
         "BTCUSDT", "ETHUSDT", "XRPUSDT", "SOLUSDT", "ADAUSDT", 
-        "DOGEUSDT", "SHIBUSDT", "PEPEUSDT"
+        "DOGEUSDT", "SHIBUSDT", "PEPEUSDT", "PORTALUSDT"
     ]
     
     # Thresholds para señales
@@ -107,12 +107,52 @@ class AnalizadorPredictivoAvanzado:
     def obtener_datos_completos(self, par):
         """Obtiene datos históricos con todas las características necesarias"""
         try:
-            klines = self.client.get_historical_klines(
-                par, self.config.INTERVALO_ENTRENAMIENTO, 
-                self.config.PERIODO_DATOS, limit=1000
-            )
+            print(f"📊 Descargando datos históricos para {par}...")
             
-            df = pd.DataFrame(klines, columns=[
+            # Obtener datos en múltiples llamadas para cubrir más tiempo
+            all_klines = []
+            end_time = None
+            
+            # Hacer múltiples llamadas para obtener más datos
+            for i in range(3):  # 3 llamadas = hasta 3000 datos
+                try:
+                    if end_time:
+                        klines = self.client.get_historical_klines(
+                            par, self.config.INTERVALO_ENTRENAMIENTO, 
+                            end_str=end_time, limit=1000
+                        )
+                    else:
+                        klines = self.client.get_historical_klines(
+                            par, self.config.INTERVALO_ENTRENAMIENTO, 
+                            self.config.PERIODO_DATOS, limit=1000
+                        )
+                    
+                    if not klines:
+                        break
+                        
+                    all_klines.extend(klines)
+                    
+                    # Actualizar end_time para la siguiente llamada
+                    if klines:
+                        end_time = klines[0][0]  # timestamp del primer elemento
+                    
+                    print(f"   📈 Llamada {i+1}: {len(klines)} registros")
+                    
+                    # Pausa para evitar límites de API
+                    time.sleep(0.5)
+                    
+                except Exception as e:
+                    print(f"   ⚠️ Error en llamada {i+1}: {e}")
+                    break
+            
+            if not all_klines:
+                print(f"❌ No se pudieron obtener datos para {par}")
+                return pd.DataFrame()
+            
+            print(f"   ✅ Total descargado: {len(all_klines)} registros")
+            
+            # Convertir a DataFrame
+            df = pd.DataFrame(all_klines, columns=[
                 'timestamp', 'open', 'high', 'low', 'close', 'volume',
                 'close_time', 'quote_volume', 'trades', 'taker_buy_volume',
                 'taker_buy_quote_volume', 'ignore'
@@ -124,8 +164,12 @@ class AnalizadorPredictivoAvanzado:
             for col in numeric_cols:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
             
+            # Ordenar por timestamp y eliminar duplicados
+            df = df.sort_values('timestamp').drop_duplicates(subset=['timestamp'])
             df.dropna(inplace=True)
             df.set_index('timestamp', inplace=True)
+            
+            print(f"   📊 Datos finales: {len(df)} registros desde {df.index[0]} hasta {df.index[-1]}")
             
             return df
             
@@ -135,7 +179,7 @@ class AnalizadorPredictivoAvanzado:
 
     def calcular_indicadores_avanzados(self, df):
         """Calcula más de 30 indicadores técnicos avanzados"""
-        if len(df) < 100:
+        if len(df) < 50:
             return df
             
         print("🔧 Calculando indicadores avanzados...")
@@ -145,18 +189,18 @@ class AnalizadorPredictivoAvanzado:
         df['precio_tipico'] = (df['high'] + df['low'] + df['close']) / 3
         df['precio_ponderado'] = (df['high'] + df['low'] + 2*df['close']) / 4
         
-        # Volatilidad
-        df['atr'] = AverageTrueRange(df['high'], df['low'], df['close'], window=14).average_true_range()
-        df['volatilidad_close'] = df['close'].rolling(20).std()
-        df['volatilidad_returns'] = df['close'].pct_change().rolling(20).std()
+        # Volatilidad (ventanas más pequeñas)
+        df['atr'] = AverageTrueRange(df['high'], df['low'], df['close'], window=10).average_true_range()
+        df['volatilidad_close'] = df['close'].rolling(10).std()
+        df['volatilidad_returns'] = df['close'].pct_change().rolling(10).std()
         
-        # Tendencia - Múltiples EMAs
-        for periodo in [9, 21, 50, 100, 200]:
+        # Tendencia - EMAs más cortas
+        for periodo in [9, 21, 50]:  # Removido 100, 200 para usar menos datos
             df[f'ema_{periodo}'] = EMAIndicator(df['close'], window=periodo).ema_indicator()
             df[f'sma_{periodo}'] = SMAIndicator(df['close'], window=periodo).sma_indicator()
         
         # Momentum avanzado
-        df['rsi'] = RSIIndicator(df['close'], window=14).rsi()
+        df['rsi'] = RSIIndicator(df['close'], window=10).rsi()  # Reducido de 14 a 10
         df['rsi_smooth'] = df['rsi'].rolling(3).mean()
         
         # Stochastic
@@ -167,27 +211,26 @@ class AnalizadorPredictivoAvanzado:
         # Williams %R
         df['williams_r'] = WilliamsRIndicator(df['high'], df['low'], df['close']).williams_r()
         
-        # MACD múltiple
-        for fast, slow in [(12, 26), (8, 21), (5, 13)]:
-            macd = MACD(df['close'], window_slow=slow, window_fast=fast)
-            df[f'macd_{fast}_{slow}'] = macd.macd()
-            df[f'macd_signal_{fast}_{slow}'] = macd.macd_signal()
-            df[f'macd_hist_{fast}_{slow}'] = macd.macd_diff()
+        # MACD múltiple (solo el principal)
+        macd = MACD(df['close'], window_slow=26, window_fast=12)
+        df['macd_12_26'] = macd.macd()
+        df['macd_signal_12_26'] = macd.macd_signal()
+        df['macd_hist_12_26'] = macd.macd_diff()
         
         # ADX (fuerza de tendencia)
         df['adx'] = ADXIndicator(df['high'], df['low'], df['close']).adx()
         
-        # Bollinger Bands múltiples
-        for periodo, std in [(20, 2), (20, 1.5), (10, 2)]:
-            bb = BollingerBands(df['close'], window=periodo, window_dev=std)
-            df[f'bb_upper_{periodo}_{std}'] = bb.bollinger_hband()
-            df[f'bb_lower_{periodo}_{std}'] = bb.bollinger_lband()
-            df[f'bb_pct_{periodo}_{std}'] = (df['close'] - bb.bollinger_lband()) / (bb.bollinger_hband() - bb.bollinger_lband())
+        # Bollinger Bands (solo el principal)
+        bb = BollingerBands(df['close'], window=20, window_dev=2)
+        df['bb_upper_20_2'] = bb.bollinger_hband()
+        df['bb_lower_20_2'] = bb.bollinger_lband()
+        df['bb_pct_20_2'] = (df['close'] - bb.bollinger_lband()) / (bb.bollinger_hband() - bb.bollinger_lband())
         
         # Volumen
         df['obv'] = OnBalanceVolumeIndicator(df['close'], df['volume']).on_balance_volume()
-        df['volume_sma'] = VolumeSMAIndicator(df['close'], df['volume']).volume_sma()
-        df['volume_ratio'] = df['volume'] / df['volume'].rolling(20).mean()
+        df['volume_sma'] = df['volume'].rolling(10).mean()  # Reducido de 20 a 10
+        df['volume_ratio'] = df['volume'] / df['volume'].rolling(10).mean()
+        df['vpt'] = VolumePriceTrendIndicator(df['close'], df['volume']).volume_price_trend()
         
         # Patrones de precios
         df['doji'] = abs(df['open'] - df['close']) / (df['high'] - df['low']) < 0.1
@@ -199,8 +242,8 @@ class AnalizadorPredictivoAvanzado:
         df['dia_semana'] = df.index.dayofweek
         df['dia_mes'] = df.index.day
         
-        # Returns múltiples períodos
-        for periodo in [1, 4, 8, 24]:
+        # Returns múltiples períodos (reducidos)
+        for periodo in [1, 4, 8]:  # Removido 24 para usar menos datos
             df[f'return_{periodo}h'] = df['close'].pct_change(periodo)
             df[f'volatilidad_{periodo}h'] = df[f'return_{periodo}h'].rolling(periodo).std()
         
@@ -210,34 +253,40 @@ class AnalizadorPredictivoAvanzado:
         """Crea features específicas para machine learning"""
         features = df.copy()
         
-        # Lags de precios
-        for lag in [1, 2, 3, 6, 12, 24]:
+        # Lags de precios (reducidos)
+        for lag in [1, 2, 3, 6]:  # Removido 12, 24 para usar menos datos
             features[f'close_lag_{lag}'] = features['close'].shift(lag)
             features[f'volume_lag_{lag}'] = features['volume'].shift(lag)
             features[f'rsi_lag_{lag}'] = features['rsi'].shift(lag)
         
-        # Rolling statistics
-        for window in [5, 10, 20]:
+        # Rolling statistics (ventanas más pequeñas)
+        for window in [5, 10]:  # Removido 20 para usar menos datos
             features[f'close_mean_{window}'] = features['close'].rolling(window).mean()
             features[f'close_std_{window}'] = features['close'].rolling(window).std()
             features[f'close_min_{window}'] = features['close'].rolling(window).min()
             features[f'close_max_{window}'] = features['close'].rolling(window).max()
         
-        # Diferencias entre medias
-        features['ema_diff_9_21'] = features['ema_9'] - features['ema_21']
-        features['ema_diff_21_50'] = features['ema_21'] - features['ema_50']
-        features['sma_diff_50_200'] = features['sma_50'] - features['sma_200']
+        # Diferencias entre medias (solo las disponibles)
+        if 'ema_9' in features.columns and 'ema_21' in features.columns:
+            features['ema_diff_9_21'] = features['ema_9'] - features['ema_21']
+        if 'ema_21' in features.columns and 'ema_50' in features.columns:
+            features['ema_diff_21_50'] = features['ema_21'] - features['ema_50']
         
         # Posición relativa en Bollinger
-        features['bb_position'] = (features['close'] - features['bb_lower_20_2']) / (features['bb_upper_20_2'] - features['bb_lower_20_2'])
+        if 'bb_lower_20_2' in features.columns and 'bb_upper_20_2' in features.columns:
+            features['bb_position'] = (features['close'] - features['bb_lower_20_2']) / (features['bb_upper_20_2'] - features['bb_lower_20_2'])
         
-        # Momentum combinado
-        features['momentum_score'] = (
-            features['rsi'].fillna(50) / 100 * 0.3 +
-            features['stoch_k'].fillna(50) / 100 * 0.3 +
-            (features['williams_r'].fillna(-50) + 100) / 100 * 0.2 +
-            features['bb_position'].fillna(0.5) * 0.2
-        )
+        # Momentum combinado (solo con indicadores disponibles)
+        momentum_components = []
+        if 'rsi' in features.columns:
+            momentum_components.append(features['rsi'].fillna(50) / 100 * 0.4)
+        if 'stoch_k' in features.columns:
+            momentum_components.append(features['stoch_k'].fillna(50) / 100 * 0.3)
+        if 'williams_r' in features.columns:
+            momentum_components.append((features['williams_r'].fillna(-50) + 100) / 100 * 0.3)
+        
+        if momentum_components:
+            features['momentum_score'] = sum(momentum_components)
         
         return features
 
@@ -253,8 +302,8 @@ class AnalizadorPredictivoAvanzado:
             future_return = (df['close'].shift(-h) - df['close']) / df['close']
             targets[f'direccion_{h}h'] = (future_return > 0.01).astype(int)  # Subida >1%
             
-            # Predicción de volatilidad
-            targets[f'volatilidad_{h}h'] = df['close'].rolling(h).std().shift(-h)
+            # Predicción de volatilidad futura
+            targets[f'volatilidad_futura_{h}h'] = df['close'].rolling(h).std().shift(-h)
             
             # Señal de trading (fuerte subida/bajada)
             targets[f'señal_trading_{h}h'] = np.where(
@@ -422,20 +471,40 @@ class AnalizadorPredictivoAvanzado:
         df = self.obtener_datos_completos(par)
         if df.empty:
             return None
+        
+        print(f"📊 Datos iniciales: {len(df)} registros")
             
         # Calcular indicadores
         df = self.calcular_indicadores_avanzados(df)
+        print(f"📊 Después de indicadores: {len(df)} registros")
+        
         df = self.crear_features_ml(df)
+        print(f"📊 Después de features ML: {len(df)} registros")
         
         # Crear targets
         targets_df = self.crear_targets_prediccion(df, self.config.HORIZONTES_PREDICCION)
+        print(f"📊 Targets creados: {len(targets_df)} registros")
+        print(f"📊 Índice targets: {targets_df.index[0]} hasta {targets_df.index[-1]}")
+        print(f"📊 Índice df: {df.index[0]} hasta {df.index[-1]}")
         
         # Combinar datos
         data_completa = df.join(targets_df, how='inner')
-        data_completa.dropna(inplace=True)
+        print(f"📊 Después del join: {len(data_completa)} registros")
+        print(f"📊 Columnas con NaN: {data_completa.isnull().sum().sum()} valores NaN totales")
         
-        if len(data_completa) < 200:
-            print(f"⚠️ Datos insuficientes para {par}")
+        # Estrategia más robusta para manejar NaN
+        # Primero forward fill para propagar valores válidos hacia adelante
+        data_completa = data_completa.fillna(method='ffill', limit=5)
+        # Luego backward fill para llenar los NaN restantes
+        data_completa = data_completa.fillna(method='bfill', limit=5)
+        # Finalmente, eliminar solo las filas que aún tienen NaN en columnas críticas
+        columnas_criticas = ['close', 'volume', 'rsi', 'macd_12_26']
+        data_completa = data_completa.dropna(subset=columnas_criticas)
+        
+        print(f"📊 Datos completos finales: {len(data_completa)} registros")
+        
+        if len(data_completa) < 100:
+            print(f"⚠️ Datos insuficientes para {par} (necesarios: 100, disponibles: {len(data_completa)})")
             return None
         
         predicciones = {}
@@ -929,12 +998,170 @@ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         
         return recomendaciones
 
+    def generar_grafico_predicciones(self, par, df, predicciones, score):
+        """Genera gráfico visual de predicciones y análisis técnico"""
+        try:
+            # Configurar el estilo del gráfico
+            plt.style.use('dark_background')
+            fig, axes = plt.subplots(3, 1, figsize=(15, 12))
+            fig.suptitle(f'🔮 ANÁLISIS PREDICTIVO AVANZADO - {par}', fontsize=16, fontweight='bold', color='white')
+            
+            # Gráfico 1: Precio y predicciones
+            ax1 = axes[0]
+            ax1.plot(df.index, df['close'], label='Precio Real', color='#00ff88', linewidth=2)
+            
+            # Agregar predicciones como líneas punteadas
+            colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4']
+            for i, (horizonte, pred) in enumerate(predicciones.items()):
+                if 'precio_predicho' in pred:
+                    # Extender el índice para mostrar predicciones futuras
+                    ultimo_tiempo = df.index[-1]
+                    tiempo_futuro = ultimo_tiempo + pd.Timedelta(hours=int(horizonte.replace('h', '')))
+                    
+                    ax1.scatter(tiempo_futuro, pred['precio_predicho'], 
+                               color=colors[i], s=100, marker='o', 
+                               label=f'Predicción {horizonte}: ${pred["precio_predicho"]:.4f}')
+                    
+                    # Línea de conexión
+                    ax1.plot([ultimo_tiempo, tiempo_futuro], 
+                            [df['close'].iloc[-1], pred['precio_predicho']], 
+                            '--', color=colors[i], alpha=0.7)
+            
+            ax1.set_title(f'📈 Precio y Predicciones - Score: {score["score_final"]}/100', color='white')
+            ax1.set_ylabel('Precio (USDT)', color='white')
+            ax1.legend()
+            ax1.grid(True, alpha=0.3)
+            
+            # Gráfico 2: Indicadores técnicos
+            ax2 = axes[1]
+            ax2.plot(df.index, df['rsi'], label='RSI', color='#ff9ff3', linewidth=2)
+            ax2.axhline(y=70, color='red', linestyle='--', alpha=0.7, label='Sobrecompra')
+            ax2.axhline(y=30, color='green', linestyle='--', alpha=0.7, label='Sobreventa')
+            ax2.set_title('📊 Indicadores Técnicos', color='white')
+            ax2.set_ylabel('RSI', color='white')
+            ax2.legend()
+            ax2.grid(True, alpha=0.3)
+            
+            # MACD en el mismo gráfico
+            ax2_twin = ax2.twinx()
+            ax2_twin.plot(df.index, df['macd_12_26'], label='MACD', color='#feca57', linewidth=1.5)
+            ax2_twin.plot(df.index, df['macd_signal_12_26'], label='Señal MACD', color='#ff9ff3', linewidth=1.5)
+            ax2_twin.set_ylabel('MACD', color='white')
+            ax2_twin.legend(loc='upper right')
+            
+            # Gráfico 3: Volumen y volatilidad
+            ax3 = axes[2]
+            ax3.bar(df.index, df['volume'], alpha=0.6, color='#54a0ff', label='Volumen')
+            ax3.set_title('📊 Volumen y Actividad', color='white')
+            ax3.set_ylabel('Volumen', color='white')
+            ax3.set_xlabel('Fecha', color='white')
+            ax3.legend()
+            ax3.grid(True, alpha=0.3)
+            
+            # Volatilidad en el mismo gráfico
+            ax3_twin = ax3.twinx()
+            ax3_twin.plot(df.index, df['volatilidad_returns'], color='#ff6b6b', linewidth=2, label='Volatilidad')
+            ax3_twin.set_ylabel('Volatilidad', color='white')
+            ax3_twin.legend(loc='upper right')
+            
+            # Ajustar layout
+            plt.tight_layout()
+            
+            # Guardar gráfico
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+            filename = f"graficos/{par}_{timestamp}.png"
+            
+            # Crear directorio si no existe
+            if not os.path.exists('graficos'):
+                os.makedirs('graficos')
+            
+            plt.savefig(filename, dpi=300, bbox_inches='tight', facecolor='black')
+            plt.close()
+            
+            print(f"📊 Gráfico guardado: {filename}")
+            return filename
+            
+        except Exception as e:
+            print(f"⚠️ Error generando gráfico para {par}: {e}")
+            return None
+
+    def generar_grafico_comparativo(self, resultados):
+        """Genera gráfico comparativo de scores entre todas las criptomonedas"""
+        try:
+            if not resultados:
+                return None
+                
+            # Preparar datos
+            pares = list(resultados.keys())
+            scores = [resultados[par]['score']['score_final'] for par in pares]
+            
+            # Configurar gráfico
+            plt.style.use('dark_background')
+            fig, ax = plt.subplots(figsize=(12, 8))
+            
+            # Crear barras con colores según el score
+            colors = []
+            for score in scores:
+                if score >= 70:
+                    colors.append('#00ff88')  # Verde para muy bullish
+                elif score >= 55:
+                    colors.append('#4ecdc4')  # Azul para bullish
+                elif score >= 45:
+                    colors.append('#feca57')  # Amarillo para neutral
+                elif score >= 30:
+                    colors.append('#ff9ff3')  # Rosa para bearish
+                else:
+                    colors.append('#ff6b6b')  # Rojo para muy bearish
+            
+            bars = ax.bar(pares, scores, color=colors, alpha=0.8, edgecolor='white', linewidth=1)
+            
+            # Agregar valores en las barras
+            for bar, score in zip(bars, scores):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + 1,
+                       f'{score:.1f}', ha='center', va='bottom', color='white', fontweight='bold')
+            
+            ax.set_title('🏆 COMPARATIVA DE SCORES PREDICTIVOS', fontsize=16, fontweight='bold', color='white', pad=20)
+            ax.set_ylabel('Score Predictivo (0-100)', color='white')
+            ax.set_xlabel('Criptomonedas', color='white')
+            ax.set_ylim(0, 100)
+            
+            # Agregar líneas de referencia
+            ax.axhline(y=70, color='#00ff88', linestyle='--', alpha=0.7, label='Muy Bullish')
+            ax.axhline(y=55, color='#4ecdc4', linestyle='--', alpha=0.7, label='Bullish')
+            ax.axhline(y=45, color='#feca57', linestyle='--', alpha=0.7, label='Neutral')
+            ax.axhline(y=30, color='#ff6b6b', linestyle='--', alpha=0.7, label='Bearish')
+            
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            
+            # Rotar etiquetas del eje X
+            plt.xticks(rotation=45, ha='right')
+            
+            # Ajustar layout
+            plt.tight_layout()
+            
+            # Guardar gráfico
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M')
+            filename = f"graficos/comparativa_scores_{timestamp}.png"
+            
+            plt.savefig(filename, dpi=300, bbox_inches='tight', facecolor='black')
+            plt.close()
+            
+            print(f"📊 Gráfico comparativo guardado: {filename}")
+            return filename
+            
+        except Exception as e:
+            print(f"⚠️ Error generando gráfico comparativo: {e}")
+            return None
+
     def ejecutar_analisis_completo(self):
         """Ejecuta análisis completo para todos los pares prioritarios"""
         print("🚀 INICIANDO SISTEMA PREDICTIVO AVANZADO")
         print("="*80)
         
         resultados = {}
+        graficos_generados = []
         
         for par in self.config.PARES_PRIORITARIOS:
             try:
@@ -944,6 +1171,14 @@ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 if resultado:
                     resultados[par] = resultado
                     print(resultado['reporte'])
+                    
+                    # Generar gráfico individual
+                    print(f"\n🎨 Generando gráfico para {par}...")
+                    grafico = self.generar_grafico_predicciones(
+                        par, resultado['datos'], resultado['predicciones'], resultado['score']
+                    )
+                    if grafico:
+                        graficos_generados.append(grafico)
                     
                     # Guardar modelo para uso futuro
                     self._guardar_modelo(par, resultado)
@@ -957,8 +1192,23 @@ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 print(f"❌ Error procesando {par}: {e}")
                 continue
         
+        # Generar gráfico comparativo
+        if resultados:
+            print(f"\n🏆 Generando gráfico comparativo...")
+            grafico_comparativo = self.generar_grafico_comparativo(resultados)
+            if grafico_comparativo:
+                graficos_generados.append(grafico_comparativo)
+        
         # Resumen general
         self._generar_resumen_general(resultados)
+        
+        # Mostrar resumen de gráficos generados
+        if graficos_generados:
+            print(f"\n📊 GRÁFICOS GENERADOS:")
+            print("="*50)
+            for grafico in graficos_generados:
+                print(f"   📈 {grafico}")
+            print(f"\n💡 Los gráficos se han guardado en la carpeta 'graficos/'")
         
         return resultados
 
@@ -1030,7 +1280,7 @@ Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 def main():
     """Función principal del sistema predictivo"""
     print("🔮 SISTEMA AVANZADO DE PREDICCIÓN DE CRIPTOMONEDAS")
-    print("Desarrollado con IA - Machine Learning & Deep Learning")
+    print("Para los trillonarios")
     print("="*80)
     
     # Crear analizador

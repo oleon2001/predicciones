@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-07-03 09:33:07",
+  "symbol": "1",
+  "tipo": "DEMO",
+  "analisis_actual": {
+    "precio_actual": 81.6043882574335,
+    "cambio_24h": 2.455776193591012,
+    "tendencia_score": 4,
+    "interpretacion": "\ud83d\udfe2 ALCISTA FUERTE",
+    "rsi": 60.33735863287843,
+    "macd": -0.5808921994933769,
+    "soporte": 69.74511008644342,
+    "resistencia": 80.87378985114267
+  },
+  "predicciones": {
+    "1h": {
+      "precio_predicho": 73.40181683458461,
+      "cambio_porcentual": -10.051630308130768,
+      "intervalo_inferior": 67.37533790795169,
+      "intervalo_superior": 79.42829576121753,
+      "confianza": 0.5
+    },
+    "4h": {
+      "precio_predicho": 104.85973833512088,
+      "cambio_porcentual": 28.497670988384634,
+      "intervalo_inferior": 92.80678048185504,
+      "intervalo_superior": 116.91269618838672,
+      "confianza": 0.5
+    },
+    "12h": {
+      "precio_predicho": 188.74752900321758,
+      "cambio_porcentual": 131.29580777909234,
+      "intervalo_inferior": 167.87119361987484,
+      "intervalo_superior": 209.6238643865603,
+      "confianza": 0.5
+    },
+    "24h": {
+      "precio_predicho": 314.57921500536264,
+      "cambio_porcentual": 285.49301296515387,
+      "intervalo_inferior": 285.05561837359,
+      "intervalo_superior": 344.1028116371353,
+      "confianza": 0.5
+    }
+  },
+  "advertencia": "DATOS SIMULADOS - SOLO PARA DEMOSTRACI\u00d3N"
+}
