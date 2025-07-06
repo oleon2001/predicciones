@@ -64,7 +64,7 @@ class ConfiguracionAvanzada:
     # Pares de alta prioridad para análisis profundo
     PARES_PRIORITARIOS = [
         "BTCUSDT", "ETHUSDT", "XRPUSDT", "SOLUSDT", "ADAUSDT", 
-        "DOGEUSDT", "SHIBUSDT", "PEPEUSDT", "PORTALUSDT"
+        "DOGEUSDT", "SHIBUSDT", "PEPEUSDT", "PORTALUSDT", "SUIUSDT", "TRUMPUSDT"
     ]
     
     # Thresholds para señales
@@ -524,6 +524,11 @@ class AnalizadorPredictivoAvanzado:
             if len(y_precio) > 100:
                 X_precio = X.loc[y_precio.index]
                 
+                # Inicializar variables
+                lstm_precio = None
+                ensemble_precio = None
+                ensemble_direccion = None
+                
                 # LSTM para precio
                 if TENSORFLOW_AVAILABLE:
                     lstm_precio = self.entrenar_modelo_lstm(
@@ -537,11 +542,12 @@ class AnalizadorPredictivoAvanzado:
                 
                 # Predicción de dirección (clasificación)
                 y_direccion = data_completa[f'direccion_{horizonte}h'].dropna()
-                X_direccion = X.loc[y_direccion.index]
-                
-                ensemble_direccion = self.entrenar_modelos_ensemble(
-                    X_direccion.values, y_direccion.values, par, horizonte, 'clasificacion'
-                )
+                if len(y_direccion) > 100:
+                    X_direccion = X.loc[y_direccion.index]
+                    
+                    ensemble_direccion = self.entrenar_modelos_ensemble(
+                        X_direccion.values, y_direccion.values, par, horizonte, 'clasificacion'
+                    )
                 
                 predicciones[f'{horizonte}h'] = {
                     'lstm_precio': lstm_precio,
@@ -588,47 +594,68 @@ class AnalizadorPredictivoAvanzado:
             pred = {'horizonte': horizonte}
             
             # Predicción de precio con ensemble
-            if modelos_h['ensemble_precio']:
+            if modelos_h.get('ensemble_precio') and modelos_h['ensemble_precio'] is not None:
                 features = modelos_h['features_actuales']
                 ensemble = modelos_h['ensemble_precio']
                 
                 predicciones_precio = []
                 for nombre, modelo in ensemble['modelos'].items():
-                    pred_precio = modelo.predict(features)[0]
-                    predicciones_precio.append(pred_precio)
+                    try:
+                        pred_precio = modelo.predict(features)[0]
+                        predicciones_precio.append(pred_precio)
+                    except Exception as e:
+                        print(f"⚠️ Error en predicción de precio con {nombre}: {e}")
+                        continue
                 
-                pred['precio_predicho'] = np.mean(predicciones_precio)
-                pred['precio_std'] = np.std(predicciones_precio)
-                pred['precio_actual'] = modelos_h['ultimo_precio']
-                pred['cambio_esperado'] = (pred['precio_predicho'] - pred['precio_actual']) / pred['precio_actual']
-                
-                # Intervalo de confianza
-                pred['precio_min'] = pred['precio_predicho'] - 1.96 * pred['precio_std']
-                pred['precio_max'] = pred['precio_predicho'] + 1.96 * pred['precio_std']
+                if predicciones_precio:
+                    pred['precio_predicho'] = np.mean(predicciones_precio)
+                    pred['precio_std'] = np.std(predicciones_precio)
+                    pred['precio_actual'] = modelos_h['ultimo_precio']
+                    pred['cambio_esperado'] = (pred['precio_predicho'] - pred['precio_actual']) / pred['precio_actual']
+                    
+                    # Intervalo de confianza
+                    pred['precio_min'] = pred['precio_predicho'] - 1.96 * pred['precio_std']
+                    pred['precio_max'] = pred['precio_predicho'] + 1.96 * pred['precio_std']
+                else:
+                    pred['precio_predicho'] = modelos_h['ultimo_precio']
+                    pred['precio_std'] = 0
+                    pred['precio_actual'] = modelos_h['ultimo_precio']
+                    pred['cambio_esperado'] = 0
+                    pred['precio_min'] = pred['precio_predicho']
+                    pred['precio_max'] = pred['precio_predicho']
             
             # Predicción de dirección
-            if modelos_h['ensemble_direccion']:
+            if modelos_h.get('ensemble_direccion') and modelos_h['ensemble_direccion'] is not None:
                 features = modelos_h['features_actuales']
                 ensemble = modelos_h['ensemble_direccion']
                 
                 probabilidades = []
                 for nombre, modelo in ensemble['modelos'].items():
-                    if hasattr(modelo, 'predict_proba'):
-                        prob = modelo.predict_proba(features)[0]
-                        probabilidades.append(prob)
-                    else:
-                        pred_class = modelo.predict(features)[0]
-                        prob = np.zeros(2)
-                        prob[pred_class] = 1.0
-                        probabilidades.append(prob)
+                    try:
+                        if hasattr(modelo, 'predict_proba'):
+                            prob = modelo.predict_proba(features)[0]
+                            probabilidades.append(prob)
+                        else:
+                            pred_class = modelo.predict(features)[0]
+                            prob = np.zeros(2)
+                            prob[pred_class] = 1.0
+                            probabilidades.append(prob)
+                    except Exception as e:
+                        print(f"⚠️ Error en predicción de dirección: {e}")
+                        continue
                 
-                prob_media = np.mean(probabilidades, axis=0)
-                pred['probabilidad_subida'] = prob_media[1] if len(prob_media) > 1 else 0.5
-                pred['prediccion_direccion'] = 'SUBIDA' if pred['probabilidad_subida'] > 0.5 else 'BAJADA'
-                pred['confianza'] = max(prob_media)
+                if probabilidades:
+                    prob_media = np.mean(probabilidades, axis=0)
+                    pred['probabilidad_subida'] = prob_media[1] if len(prob_media) > 1 else 0.5
+                    pred['prediccion_direccion'] = 'SUBIDA' if pred['probabilidad_subida'] > 0.5 else 'BAJADA'
+                    pred['confianza'] = max(prob_media)
+                else:
+                    pred['probabilidad_subida'] = 0.5
+                    pred['prediccion_direccion'] = 'NEUTRAL'
+                    pred['confianza'] = 0.5
             
             # LSTM si está disponible
-            if modelos_h['lstm_precio'] and TENSORFLOW_AVAILABLE:
+            if modelos_h.get('lstm_precio') and TENSORFLOW_AVAILABLE:
                 try:
                     lstm_model = modelos_h['lstm_precio']
                     # Preparar datos para LSTM (necesita secuencia)
@@ -636,6 +663,8 @@ class AnalizadorPredictivoAvanzado:
                     pred['lstm_disponible'] = True
                 except:
                     pred['lstm_disponible'] = False
+            else:
+                pred['lstm_disponible'] = False
             
             predicciones[horizonte] = pred
         
