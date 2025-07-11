@@ -2,9 +2,9 @@
   "_comentario": "Archivo de configuración para el Sistema Integrado de Análisis y Predicción",
   "_instrucciones": "Copia este archivo como 'config.json' y ajusta los valores según tus necesidades",
   
-  "api_key": "TU_API_KEY_BINANCE_AQUI",
-  "api_secret": "TU_API_SECRET_BINANCE_AQUI",
-  "news_api_key": "TU_NEWS_API_KEY_AQUI",
+  "api_key": "26Sh06jOHDKVRqZY5puDa7q16hQ1CU0aitWM0OWy1iMF0jU8h8jqKqUFsxzLC5Ze",
+  "api_secret": "yOWjPf3wHDuQbBJVKll3kDYGG6c57GiUgbdu6Xp79VnAG3dzC5AUMU4IDd3LhsnT",
+  "news_api_key": "95a1ebc226f34eb38842c95fd4ce1932",
   
   "pares_analizar": [
     "BTCUSDT",
